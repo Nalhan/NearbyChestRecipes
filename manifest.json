@@ -2,7 +2,7 @@
   "name": "NearbyChestRecipes",
   "version_number": "1.0.0",
   "website_url": "https://github.com/Nalhan/NearbyChestRecipes",
-  "description": "Automatically unlocks recipes, hammer build pieces, and material discoveries from items stored in nearby chests and containers.",
+  "description": "Unlocks recipes, build pieces, and materials from items in nearby chests.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2202"
   ]
