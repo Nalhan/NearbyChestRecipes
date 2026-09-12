@@ -76,7 +76,7 @@ jobs:
       - name: Download BepInExPack Valheim
         if: steps.cache-assemblies.outputs.cache-hit != 'true'
         run: |
-          curl -sqL "https://valheim.thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2202/" -o bepinex.zip
+          curl -fSL "https://gcdn.thunderstore.io/live/repository/packages/denikson-BepInExPack_Valheim-5.4.2202.zip" -o bepinex.zip
           unzip -qo bepinex.zip -d bepinex_pack
 
       - name: Build Mod DLL
