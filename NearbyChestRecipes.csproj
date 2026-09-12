@@ -6,8 +6,13 @@
     <AssemblyName>NearbyChestRecipes</AssemblyName>
     <RootNamespace>NearbyChestRecipes</RootNamespace>
     <Version>1.0.0</Version>
-    <ValheimManaged>/home/pergola/valheim/data/server/valheim_server_Data/Managed</ValheimManaged>
-    <BepInExCore>/home/pergola/valheim/data/bepinex/BepInEx/core</BepInExCore>
+
+    <!-- Path resolution: checks CLI property, local server, or CI directory -->
+    <ValheimManaged Condition="'$(ValheimManaged)' == '' and Exists('/home/pergola/valheim/data/server/valheim_server_Data/Managed')">/home/pergola/valheim/data/server/valheim_server_Data/Managed</ValheimManaged>
+    <ValheimManaged Condition="'$(ValheimManaged)' == '' and Exists('$(MSBuildThisFileDirectory)valheim_server/valheim_server_Data/Managed')">$(MSBuildThisFileDirectory)valheim_server/valheim_server_Data/Managed</ValheimManaged>
+
+    <BepInExCore Condition="'$(BepInExCore)' == '' and Exists('/home/pergola/valheim/data/bepinex/BepInEx/core')">/home/pergola/valheim/data/bepinex/BepInEx/core</BepInExCore>
+    <BepInExCore Condition="'$(BepInExCore)' == '' and Exists('$(MSBuildThisFileDirectory)bepinex_pack/BepInExPack_Valheim/BepInEx/core')">$(MSBuildThisFileDirectory)bepinex_pack/BepInExPack_Valheim/BepInEx/core</BepInExCore>
   </PropertyGroup>
 
   <ItemGroup>

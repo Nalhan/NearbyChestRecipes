@@ -1,6 +1,13 @@
 # Build and binary folders
 bin/
 obj/
+dist/
+*.zip
+
+# Local CI / assembly download cache
+valheim_server/
+bepinex_pack/
+steamcmd/
 
 # Visual Studio / Rider / IDE files
 .vs/
