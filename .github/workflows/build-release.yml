@@ -1,0 +1,115 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Create a GitHub Release?'
+        type: boolean
+        default: false
+      version:
+        description: 'Version string (e.g. 1.0.1). If omitted, uses tag or manifest.json'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    name: Build & Package Thunderstore Zip
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Resolve Version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VER="${GITHUB_REF#refs/tags/v}"
+          elif [ -n "${{ github.event.inputs.version }}" ]; then
+            VER="${{ github.event.inputs.version }}"
+          else
+            VER=$(python3 -c 'import json; print(json.load(open("manifest.json"))["version_number"])')
+          fi
+          echo "VERSION=$VER" >> $GITHUB_OUTPUT
+          echo "Resolved version: $VER"
+
+          # Update manifest.json version to match if needed
+          python3 -c "
+          import json
+          with open('manifest.json', 'r') as f:
+              m = json.load(f)
+          m['version_number'] = '$VER'
+          with open('manifest.json', 'w') as f:
+              json.dump(m, f, indent=2)
+          "
+
+      - name: Cache Valheim Server & BepInEx Assemblies
+        id: cache-assemblies
+        uses: actions/cache@v4
+        with:
+          path: |
+            valheim_server
+            bepinex_pack
+          key: valheim-assemblies-v1
+
+      - name: Download Valheim Server via SteamCMD
+        if: steps.cache-assemblies.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p steamcmd
+          curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - -C steamcmd
+          ./steamcmd/steamcmd.sh +force_install_dir "$PWD/valheim_server" +login anonymous +app_update 896660 validate +quit || true
+
+      - name: Download BepInExPack Valheim
+        if: steps.cache-assemblies.outputs.cache-hit != 'true'
+        run: |
+          curl -sqL "https://valheim.thunderstore.io/package/download/denikson/BepInExPack_Valheim/5.4.2202/" -o bepinex.zip
+          unzip -qo bepinex.zip -d bepinex_pack
+
+      - name: Build Mod DLL
+        run: |
+          dotnet build -c Release -p:Version=${{ steps.version.outputs.VERSION }} NearbyChestRecipes.csproj
+
+      - name: Assemble Thunderstore Package
+        run: |
+          mkdir -p dist/package
+          cp manifest.json dist/package/
+          cp README.md dist/package/
+          cp icon.png dist/package/
+          cp bin/Release/netstandard2.1/NearbyChestRecipes.dll dist/package/
+
+          cd dist/package
+          zip -r "../NearbyChestRecipes-${{ steps.version.outputs.VERSION }}.zip" ./*
+          cd ../..
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NearbyChestRecipes-Thunderstore-Package
+          path: dist/*.zip
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name || format('v{0}', steps.version.outputs.VERSION) }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/NearbyChestRecipes-${{ steps.version.outputs.VERSION }}.zip
+            bin/Release/netstandard2.1/NearbyChestRecipes.dll
