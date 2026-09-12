@@ -71,7 +71,7 @@ jobs:
         run: |
           mkdir -p steamcmd
           curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf - -C steamcmd
-          ./steamcmd/steamcmd.sh +force_install_dir "$PWD/valheim_server" +login anonymous +app_update 896660 validate +quit || true
+          ./steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType linux +force_install_dir "$PWD/valheim_server" +login anonymous +app_update 896660 validate +quit
 
       - name: Download BepInExPack Valheim
         if: steps.cache-assemblies.outputs.cache-hit != 'true'
