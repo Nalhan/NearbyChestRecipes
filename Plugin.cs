@@ -235,9 +235,9 @@ public class Plugin : BaseUnityPlugin
     [HarmonyPatch(typeof(Container), nameof(Container.Interact))]
     private static class ContainerInteractPatch
     {
-        private static void Postfix(Container __instance, Humanoid user)
+        private static void Postfix(Container __instance, Humanoid character)
         {
-            if (__instance != null && user == Player.m_localPlayer && Instance != null && Instance.ModEnabled.Value)
+            if (__instance != null && character == Player.m_localPlayer && Instance != null && Instance.ModEnabled.Value)
             {
                 Instance.DiscoverFromContainer(Player.m_localPlayer, __instance);
             }
