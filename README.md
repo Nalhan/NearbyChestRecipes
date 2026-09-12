@@ -44,5 +44,5 @@ LogDiscoveries = false
 ```
 
 ## Installation
-- **Client (Required for player character discovery):** Copy `NearbyChestRecipes.dll` into your Valheim client's `BepInEx/plugins/` folder.
-- **Server:** You can also keep `NearbyChestRecipes.dll` in your server's `BepInEx/plugins/NearbyChestRecipes/` folder.
+- **Client-only:** Copy `NearbyChestRecipes.dll` into your Valheim client's `BepInEx/plugins/` folder (or install via Thunderstore / r2modman).
+- **Dedicated Server:** **Not required.** Discovery and recipes are saved in the player's local character profile, so dedicated servers do not need this mod installed.
